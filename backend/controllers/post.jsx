@@ -11,13 +11,13 @@ try {
         },
         owner:req.user._id
     }
-    const post=await Post.create(newPostData);
+    const post=await Post.create(newPostData); 
     const user=await User.findById(req.user._id);
     user.posts.push(post._id);
 
     await user.save();
     res.status(201).json({
-        success:true,
+        success:true, 
         post,
     })
     
