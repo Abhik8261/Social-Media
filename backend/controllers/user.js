@@ -69,3 +69,36 @@ const options={expires:new Date(Date.now()+90*24*60*60*1000),
         
     }
 }
+
+exports.followUser=async(req,res)=>{
+    try {
+
+        const userToFollow=await User.findById(req.params.id);
+        const loggedInUser=await User.findById(req.user._id);
+        if(!userToFollow){
+            return res.status(404).json({
+                success:flase,
+                message:"user not found"
+            });
+
+        }
+        if(loggedInUser.followering.includes(userToFollow._id)){
+            loggedInUser.followering.splice()
+        }
+        loggedInUser.followering.push(userToFollow._id);
+        userToFollow.followers.push(loggedInUser._id);
+
+        await loggedInUser.save();
+        await userToFollow.save();
+        res.status(200).json({
+            success:true,
+            message:"User followed",
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            success:false,
+            message:error.message,
+        })
+    }
+}
