@@ -1,5 +1,5 @@
 const User=require('../models/User');
-
+const Post=require('../models/Post')
 
 
 exports.register=async(req,res)=>{
@@ -91,8 +91,14 @@ exports.logout=async(req,res)=>{
 exports.updatePassword=async(req,res)=>{
 
     try {
-        const user=await User.findById(res.user._id);
+        const user=await User.findById(req.user._id).select("+password");
         const {oldPassword,newPassword}=req.body;
+        if(!oldPassword || !newPassword){
+            return res.status(400).json({
+                success:false,
+                message:"Please provide old and new password"
+            })
+        }
         const isMatch=await user.matchPassword(oldPassword);
         if(!isMatch){
             return res.status(400).json({
@@ -114,8 +120,59 @@ exports.updatePassword=async(req,res)=>{
     }
 }
 
+exports.updateProfile=async (req,res)=>{
+    try {
+        const user=await User.findById(req.user._id);
+        const {name,email}=req.body;
+        if(name){
+            user.name=name;
+        }
+        if(email){
+            user.email=email;
+        }
+        //profile pic
+        await user.save();
+        res.status(200).json({
+            success:true,
+            message:"Profile is updated",
+        })
+        
+    } catch (error) {
+        res.status(500).json({
+            success:false,
+            message:error.message,
+        })
+        
+    }
+}
+
+exports.detleteProfile=async(req,res)=>{
+    try {
+        const user=await User.findById(req.user._id)
+        const posts=user.posts;
+        await user.remove();
+        //logout user after deletion of account
+       res.cookie("token",null,{expires:new Date(Date.now()),httpOnly:true})
+for(let i=0;i<posts.length;i++){
+    const post=await Post.findById(posts[i]);
+    await post.remove();
+}
+
+        res.status(200).json({
+            success:true,
+            message:"Profile is deleted"
+        })
 
 
+    } catch (error) {
+
+        res.status(500).json({
+            success:false,
+            message:error.message,
+        })
+    }
+
+}
 
 
 exports.followUser=async(req,res)=>{
