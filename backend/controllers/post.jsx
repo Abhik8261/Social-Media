@@ -102,3 +102,27 @@ exports.likeAndlikePost=async (req,res)=>{
     }
 }
 
+exports.getPostOfFollowing= async(req,res)=>{
+    try {
+        const user=await User.findById(req.user._id);
+        // .populate(
+        //     "followering",  
+        //     "posts"
+        // );
+        const posts=await Post.find({
+            owner:{
+                $in:user.followering,
+            }
+        })
+res.status(200).json({
+    success:true,
+   posts,
+})
+    } catch (error) {
+        res.status(500).json({
+            success:false,
+            message:error.message
+        })
+        
+    }
+}
