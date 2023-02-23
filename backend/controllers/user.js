@@ -150,13 +150,39 @@ exports.detleteProfile=async(req,res)=>{
     try {
         const user=await User.findById(req.user._id)
         const posts=user.posts;
+        const userId=user._id;
+        const followering=user.followering;
+        await user.remove();
+        const followers=user.followers;
+
         await user.remove();
         //logout user after deletion of account
        res.cookie("token",null,{expires:new Date(Date.now()),httpOnly:true})
-for(let i=0;i<posts.length;i++){
+
+//delte all posts of the user
+       for(let i=0;i<posts.length;i++){
     const post=await Post.findById(posts[i]);
     await post.remove();
 }
+
+//removing User from followers and following
+for(let i=0;i<followers.length;i++){
+    const follower=await User.findById(followers[i]);
+
+    const index=follower.followering.indexOf(userId);
+    follower.followering.splice(index,1);
+    await  follower.save();
+}
+//removing User from following 's followers
+for(let i=0;i<followering.length;i++){
+    const follows=await User.findById(followering[i]);
+
+    const index=follows.followers.indexOf(userId);
+    follows.followers.splice(index,1);
+    await  follows.save();
+}
+
+
 
         res.status(200).json({
             success:true,
@@ -220,4 +246,21 @@ exports.followUser=async(req,res)=>{
             message:error.message,
         })
     }
+}
+
+exports.myProfile=async (req,res)=>{
+try {
+    const user=await User.findById(req.user._id).populate("posts");
+    res.status(200).json({
+        success:true,
+        user,
+    })
+
+
+} catch (error) {
+    res.status.json({
+        success:false,
+        message:error.message,
+    })
+}
 }
