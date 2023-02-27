@@ -209,7 +209,7 @@ exports.deleteComment=async (req,res)=>{
         }
 
 
-        if(post.owner.toString===req.user._id.toString){
+        if(post.owner.toString()===req.user._id.toString()){
 
             if(req.body.commentId==undefined){
                 return res.status(400).json({
