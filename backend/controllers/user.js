@@ -1,6 +1,6 @@
 const User=require('../models/User');
 const Post=require('../models/Post')
-
+const { sendEmail } = require("../Middleware/sendEmail")
 
 exports.register=async(req,res)=>{
     try {
