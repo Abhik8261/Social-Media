@@ -1,10 +1,12 @@
 import {configureStore} from  '@reduxjs/toolkit'
-
+import { userReducer } from './Reducers/User';
 
 const initialState={}
 
-const store=configureStore(initialState,{
-    reducer:{}
+const store=configureStore({
+    reducer:{
+        user:userReducer,
+    }
 });
 
 
